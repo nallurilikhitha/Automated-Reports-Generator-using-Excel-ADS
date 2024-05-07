@@ -1,0 +1,49 @@
+Sub GenerateReport()
+    On Error GoTo ErrorHandler
+    
+    ' Define variables
+    Dim wsData As Worksheet
+    Dim wsTemplate As Worksheet
+    Dim rngData As Range
+    Dim rngTemplate As Range
+    Dim reportName As String
+    
+    ' Set references to worksheets
+    Set wsData = ThisWorkbook.Sheets("DataSheet")
+    Set wsTemplate = ThisWorkbook.Sheets("ReportTemplate")
+    
+    ' Define the range of data
+    On Error Resume Next
+    Set rngData = wsData.Range("A1").CurrentRegion ' Assuming data starts from A1
+    On Error GoTo 0
+    
+    If rngData Is Nothing Then
+        MsgBox "No data found.", vbExclamation
+        Exit Sub
+    End If
+    
+    ' Define the range of the report template
+    Set rngTemplate = wsTemplate.Range("A1:D10") ' Assuming the template range
+    
+    ' Create a new worksheet for the report
+    Dim wsReport As Worksheet
+    Set wsReport = ThisWorkbook.Sheets.Add
+    
+    ' Copy the template to the report worksheet
+    rngTemplate.Copy wsReport.Range("A1")
+    
+    ' Paste data into the report worksheet
+    rngData.Copy wsReport.Range("A2")
+    
+    ' Save the report
+    reportName = "GeneratedReport_" & Format(Now, "yyyymmdd_hhmmss")
+    wsReport.Name = reportName
+    wsReport.Copy
+    ActiveWorkbook.SaveAs Filename:=reportName & ".xlsx", FileFormat:=xlOpenXMLWorkbook, Password:="YourPasswordHere"
+    ActiveWorkbook.Close SaveChanges:=False
+    
+    Exit Sub
+    
+ErrorHandler:
+    MsgBox "An error occurred: " & Err.Description, vbCritical
+End Sub
